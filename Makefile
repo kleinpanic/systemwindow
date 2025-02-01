@@ -1,21 +1,25 @@
 CC = gcc
-CFLAGS = -Wall -Wextra
-LIBS = -lncurses
-TARGET = systeminfo
-PREFIX = /usr/local
+CFLAGS = -Wall -Wextra -Iinclude
+LDFLAGS = -lncurses
 
-all: $(TARGET)
+SRC = src/main.c src/env_detect.c src/cpu_info.c src/memory_info.c src/disk_info.c src/tui.c src/framebuffer.c src/gui.c
+OBJ = $(SRC:src/%.c=obj/%.o)
+TARGET = build/system_hub
 
-$(TARGET): main.c
-	$(CC) $(CFLAGS) -o $(TARGET) main.c $(LIBS)
+all: build_dir $(TARGET)
 
-install: $(TARGET)
-	install -m 0755 $(TARGET) $(PREFIX)/bin/$(TARGET)
+build_dir:
+	mkdir -p build
 
-uninstall:
-	rm -f $(PREFIX)/bin/$(TARGET)
+$(TARGET): $(OBJ)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+obj/%.o: src/%.c
+	mkdir -p obj
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(TARGET)
+	rm -rf obj build
 
-.PHONY: all install uninstall clean
+.PHONY: all clean build_dir
+
